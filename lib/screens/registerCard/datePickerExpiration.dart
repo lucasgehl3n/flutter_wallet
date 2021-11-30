@@ -14,10 +14,10 @@ class DatePickerVencimento extends StatefulWidget {
 
 class DatePickerVencimentoState extends State<DatePickerVencimento> {
   //Method for showing the date picker
-  void _pickDateDialog(ProviderFormularioCadastroCartao providerForm) {
+  void _pickDateDialog(ProviderFormRegisterCreditCard providerForm) {
     showMonthPicker(
       context: context,
-      initialDate: providerForm.dataValidadeSelecionada ?? DateTime.now(),
+      initialDate: providerForm.expirationDateSelected ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(
         const Duration(days: 20000),
@@ -27,14 +27,14 @@ class DatePickerVencimentoState extends State<DatePickerVencimento> {
         return;
       }
       setState(() {
-        providerForm.dataValidadeSelecionada = pickedDate;
+        providerForm.expirationDateSelected = pickedDate;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProviderFormularioCadastroCartao>(
+    return Consumer<ProviderFormRegisterCreditCard>(
       builder: (context, providerForm, child) => Stack(
         children: [
           Padding(
@@ -57,11 +57,11 @@ class DatePickerVencimentoState extends State<DatePickerVencimento> {
                     Expanded(
                       flex: 4,
                       child: Text(
-                        providerForm.dataValidadeSelecionada ==
+                        providerForm.expirationDateSelected ==
                                 null //ternary expression to check if date is null
                             ? ''
                             : DateFormat("MM/yy")
-                                .format(providerForm.dataValidadeSelecionada!),
+                                .format(providerForm.expirationDateSelected!),
                         style: TextStyle(
                           fontSize: 16,
                           fontFamily: 'Roboto',

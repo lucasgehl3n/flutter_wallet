@@ -1,5 +1,5 @@
 import 'package:carteira_app/general/general.dart';
-import 'package:carteira_app/screens/home/home.dart';
+import 'package:carteira_app/screens/authentication/authentication.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,9 +11,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Carteira APP',
       theme: ColorsApplication.themeMaterialApplication,
-      home: HomeCarteira(title: 'Flutter Demo Home Page'),
+      home: Authentication(),
     );
   }
 }

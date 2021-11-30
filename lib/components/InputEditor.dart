@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
-class Editor extends StatelessWidget {
+class InputEditor extends StatelessWidget {
   final TextEditingController? controlador;
   final String? rotulo;
   final String? dica;
@@ -14,7 +14,7 @@ class Editor extends StatelessWidget {
   final TextAlign? alinhamento;
   final MaskTextInputFormatter? mascara;
   final int maxLines;
-  Editor({
+  InputEditor({
     this.controlador,
     this.rotulo,
     this.dica,

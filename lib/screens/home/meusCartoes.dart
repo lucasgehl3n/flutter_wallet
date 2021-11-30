@@ -1,18 +1,16 @@
+import 'package:carteira_app/WebApi/webclients/creditCard_webclient.dart';
+import 'package:carteira_app/components/Loader.dart';
 import 'package:carteira_app/components/NavigationTransition.dart';
 import 'package:carteira_app/general/general.dart';
-import 'package:carteira_app/models/Cartao.dart';
-import 'package:carteira_app/screens/cadastroCartao/formularioCadastroCartaoScreen.dart';
+import 'package:carteira_app/models/CreditCard.dart';
+import 'package:carteira_app/providers/ProviderCards.dart';
 import 'package:carteira_app/screens/home/cartaoPreview.dart';
+import 'package:carteira_app/screens/registerCard/formRegisterCreditCardScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class MeusCartoes extends StatelessWidget {
-  final List<Widget> cardList = [
-    CartaoPreview(new Cartao("C1", DateTime.now(), "256", ".... 4567")),
-    CartaoPreview(new Cartao("C2", DateTime.now(), "246", ".... 4533")),
-    CartaoPreview(new Cartao("C3", DateTime.now(), "333", ".... 4555")),
-    CartaoPreview(new Cartao("C4", DateTime.now(), "222", ".... 4566")),
-  ];
-  MeusCartoes();
+class MyCards extends StatelessWidget {
+  MyCards();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,22 +24,66 @@ class MeusCartoes extends StatelessWidget {
         ),
         color: Color(0xff232323),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(48.0),
-        child: ListaCartoes(cardList: cardList),
+      child: ChangeNotifierProvider(
+        create: (context) => ProviderCards(),
+        child: ListCreditCardSearch(),
       ),
     );
   }
 }
 
-class ListaCartoes extends StatelessWidget {
-  const ListaCartoes({
-    Key? key,
-    required this.cardList,
-  }) : super(key: key);
+class ListCreditCardSearch extends StatelessWidget {
+  final CreditCardWebClient _webClient = CreditCardWebClient();
 
-  final List<Widget> cardList;
+  ListCreditCardSearch();
 
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProviderCards>(
+      builder: (context, providerForm, child) => Padding(
+        padding: const EdgeInsets.all(48.0),
+        // child: ListaCartoes(cardList: cardList),
+        child: FutureBuilder<List<CreditCard>>(
+          future: _webClient.findAll(),
+          builder: (context, snapshot) {
+            providerForm.cards = snapshot.data;
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                break;
+              case ConnectionState.waiting:
+                return Loader();
+
+              //Tem um dado disponível, mas ainda não terminou (stream)
+              //Ex: pedaço de um download falando progresso
+              case ConnectionState.active:
+                return Loader();
+              case ConnectionState.done:
+                return ListedCreditCards(
+                  (providerForm.cards
+                          ?.map(
+                            (x) => CreditCardPreview(x),
+                          )
+                          .toList()) ??
+                      [],
+                );
+            }
+            return Loader();
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ListedCreditCards extends StatefulWidget {
+  final List<CreditCardPreview> cardList;
+  const ListedCreditCards(this.cardList);
+
+  @override
+  State<ListedCreditCards> createState() => _ListedCreditCardsState();
+}
+
+class _ListedCreditCardsState extends State<ListedCreditCards> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -51,80 +93,57 @@ class ListaCartoes extends StatelessWidget {
             minHeight: MediaQuery.of(context).size.height * 0.55),
         child: IntrinsicHeight(
           child: Container(
-            child: Column(
-              children: [
-                CarouselCartaoPreview(cardList),
-                Spacer(),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: ElevatedButton(
-                    // onPressed: () => {_exibirBottomSheet(context)},
-                    onPressed: () => {
-                      Navigator.of(context).push(
-                        NavigationTransition.createRoute(
-                          FormularioCadastroCartaoScreen(
-                            new Cartao(
-                                "C1",
-                                DateTime.now().add(Duration(days: 60)),
-                                "256",
-                                ".... 4567"),
-                          ),
-                        ),
-                      ),
-                    },
-                    child: Text('Adicionar Cartão'),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(26), // <-- Radius
-                      ),
-                      primary: ColorsApplication.greenColor,
-                      onPrimary: Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: _returnWidgets(context),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _exibirBottomSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24.0),
-              topRight: Radius.circular(24.0),
+  Column _returnWidgets(BuildContext context) {
+    List<Widget> listaWidgets = [];
+    if (widget.cardList.isNotEmpty) {
+      listaWidgets.add(CarouselCreditCardPreview(widget.cardList));
+    } else {
+      listaWidgets.add(
+        Text('Nenhum registro encontrado'),
+      );
+    }
+    listaWidgets.add(Spacer());
+    listaWidgets.add(
+      SizedBox(
+        width: MediaQuery.of(context).size.width * 0.6,
+        child: ElevatedButton(
+          onPressed: () => {
+            _createCreditCard(
+              context,
+            )
+          },
+          child: Text('Adicionar Cartão'),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26), // <-- Radius
             ),
-            color: Colors.white,
+            primary: ColorsApplication.greenColor,
+            onPrimary: Colors.black87,
           ),
-          height: MediaQuery.of(context).size.height * 0.7,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [FormularioCadastroCartao2()],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class FormularioCadastroCartao2 extends StatelessWidget {
-  const FormularioCadastroCartao2({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [],
+        ),
       ),
     );
+    return Column(children: listaWidgets);
+  }
+
+  void _createCreditCard(BuildContext context) {
+    Navigator.of(context)
+        .push(
+      NavigationTransition.createRoute(
+        FormRegisterCreditCardScreen(CreditCard.newCard()),
+      ),
+    )
+        .then((value) async {
+      final CreditCardWebClient _webClient = CreditCardWebClient();
+      Provider.of<ProviderCards>(context, listen: false)
+          .updateCards(await _webClient.findAll());
+    });
   }
 }

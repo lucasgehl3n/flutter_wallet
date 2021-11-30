@@ -1,18 +1,24 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carteira_app/WebApi/webclients/creditCard_webclient.dart';
+import 'package:carteira_app/components/NavigationTransition.dart';
 import 'package:carteira_app/general/general.dart';
-import 'package:carteira_app/models/Cartao.dart';
+import 'package:carteira_app/models/CreditCard.dart';
+import 'package:carteira_app/providers/ProviderCards.dart';
+import 'package:carteira_app/screens/registerCard/formRegisterCreditCardScreen.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class CarouselCartaoPreview extends StatefulWidget {
-  final List cardList;
-  const CarouselCartaoPreview(this.cardList);
+class CarouselCreditCardPreview extends StatefulWidget {
+  final List<CreditCardPreview> cardList;
+  CarouselCreditCardPreview(this.cardList);
 
   @override
-  _CarouselCartaoPreviewState createState() => _CarouselCartaoPreviewState();
+  _CarouselCreditCardPreviewState createState() =>
+      _CarouselCreditCardPreviewState();
 }
 
-class _CarouselCartaoPreviewState extends State<CarouselCartaoPreview> {
+class _CarouselCreditCardPreviewState extends State<CarouselCreditCardPreview> {
   int _currentIndex = 0;
   @override
   Widget build(BuildContext context) {
@@ -57,40 +63,64 @@ class _CarouselCartaoPreviewState extends State<CarouselCartaoPreview> {
   }
 }
 
-class CartaoPreview extends StatelessWidget {
-  final Cartao cartao;
-  CartaoPreview(this.cartao);
+class CreditCardPreview extends StatefulWidget {
+  final CreditCard creditCard;
+  CreditCardPreview(this.creditCard);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.topLeft,
-      decoration: BoxDecoration(
-        color: Color(0xff121212),
-        borderRadius: BorderRadius.circular(8),
-      ),
+  State<CreditCardPreview> createState() => _CreditCardPreviewState();
+}
 
-      // constraints:
-      // BoxConstraints(minHeight: context).size.height * 0.25),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(36, 24, 36, 24),
-        child: Column(
-          // mainAxisSize: MainAxisSize.max,
-          children: [
-            IconeCartaoPreview(),
-            NomeCartaoPreview(cartao),
-            Spacer(),
-            InfosCartaoPreview(cartao)
-          ],
+class _CreditCardPreviewState extends State<CreditCardPreview> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: BoxDecoration(
+          color: Color(0xff121212),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(36, 24, 36, 24),
+          child: Column(
+            // mainAxisSize: MainAxisSize.max,
+            children: [
+              IconCreditCardPreview(),
+              NameCreditCardPreview(widget.creditCard),
+              Spacer(),
+              InfosCartaoPreview(widget.creditCard)
+            ],
+          ),
         ),
       ),
+      onTap: () {
+        _editCreditCard(
+          context,
+          widget.creditCard,
+        );
+      },
     );
+  }
+
+  void _editCreditCard(BuildContext context, CreditCard creditCard) {
+    Navigator.of(context)
+        .push(
+      NavigationTransition.createRoute(
+        FormRegisterCreditCardScreen(creditCard),
+      ),
+    )
+        .then((value) async {
+      final CreditCardWebClient _webClient = new CreditCardWebClient();
+      Provider.of<ProviderCards>(context, listen: false)
+          .updateCards(await _webClient.findAll());
+    });
   }
 }
 
 class InfosCartaoPreview extends StatelessWidget {
-  final Cartao cartao;
-  InfosCartaoPreview(this.cartao);
+  final CreditCard creditCard;
+  InfosCartaoPreview(this.creditCard);
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +133,7 @@ class InfosCartaoPreview extends StatelessWidget {
             Expanded(
               flex: 9,
               child: Text(
-                cartao.numeroCartao,
+                creditCard.number,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w200,
@@ -117,7 +147,7 @@ class InfosCartaoPreview extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  cartao.retornarVencimentoFormatado(),
+                  creditCard.expirationDateFormat(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w200,
@@ -134,8 +164,8 @@ class InfosCartaoPreview extends StatelessWidget {
   }
 }
 
-class IconeCartaoPreview extends StatelessWidget {
-  const IconeCartaoPreview({
+class IconCreditCardPreview extends StatelessWidget {
+  const IconCreditCardPreview({
     Key? key,
   }) : super(key: key);
 
@@ -151,16 +181,16 @@ class IconeCartaoPreview extends StatelessWidget {
   }
 }
 
-class NomeCartaoPreview extends StatelessWidget {
-  final Cartao cartao;
-  NomeCartaoPreview(this.cartao);
+class NameCreditCardPreview extends StatelessWidget {
+  final CreditCard creditCard;
+  NameCreditCardPreview(this.creditCard);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.topLeft,
       child: Text(
-        cartao.descricao,
+        creditCard.description,
         textAlign: TextAlign.left,
         style: TextStyle(
           fontSize: 16,
