@@ -1,15 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:carteira_app/WebApi/webclients/user_webclient.dart';
 import 'package:carteira_app/components/InputEditor.dart';
 import 'package:carteira_app/components/ResponseDialog.dart';
 import 'package:carteira_app/general/general.dart';
 import 'package:carteira_app/models/User.dart';
-import 'package:carteira_app/providers/ProviderGeneralInfos.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 
 class FormRegisterUserScreen extends StatelessWidget {
   final User user;
@@ -51,9 +47,6 @@ class _FieldsFormUserRegisterState extends State<FieldsFormUserRegister> {
   void initState() {
     super.initState();
     _nameController.text = widget.user.name;
-    if (widget.user.profilePhoto.isNotEmpty) {
-      _imageProfile = File(widget.user.profilePhoto);
-    }
   }
 
   @override
@@ -89,23 +82,33 @@ class _FieldsFormUserRegisterState extends State<FieldsFormUserRegister> {
           ? ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: Image.file(
-                _imageProfile!,
+                File(_imageProfile!.path),
                 width: 100,
                 height: 100,
                 fit: BoxFit.fitHeight,
               ),
             )
-          : Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(50)),
-              width: 100,
-              height: 100,
-              child: Icon(
-                Icons.account_circle_sharp,
-                color: ColorsApplication.primaryColor,
-                size: 100,
-              ),
-            ),
+          : widget.user.urlProfilePhoto.isNotEmpty
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.network(
+                    widget.user.urlProfilePhoto,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fitHeight,
+                  ),
+                )
+              : Container(
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(50)),
+                  width: 100,
+                  height: 100,
+                  child: Icon(
+                    Icons.account_circle_sharp,
+                    color: ColorsApplication.primaryColor,
+                    size: 100,
+                  ),
+                ),
     );
   }
 
@@ -126,6 +129,12 @@ class _FieldsFormUserRegisterState extends State<FieldsFormUserRegister> {
       _validate(user);
       var salvar = await _sendSave(user, context);
       if (salvar) {
+        _imageProfile = null;
+        final UserWebClient _webClient = UserWebClient();
+        var userAtualizado =
+            await _webClient.findUser(GeneralInfos.getUserLoginId());
+
+        user.urlProfilePhoto = userAtualizado.urlProfilePhoto;
         Navigator.pop(context, user);
       }
     }).catchError((error) {
@@ -137,9 +146,9 @@ class _FieldsFormUserRegisterState extends State<FieldsFormUserRegister> {
     var user = widget.user;
     user.name = _nameController.text;
     if (_imageProfile != null) {
-      user.profilePhoto = _imageProfile!.path;
+      user.profilePhoto = _imageProfile;
     } else {
-      user.profilePhoto = "";
+      user.profilePhoto = null;
     }
     return user;
   }

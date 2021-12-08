@@ -59,7 +59,7 @@ class DatePickerVencimentoState extends State<DatePickerVencimento> {
                       child: Text(
                         providerForm.expirationDateSelected ==
                                 null //ternary expression to check if date is null
-                            ? ''
+                            ? "Nenhuma data selecionada."
                             : DateFormat("MM/yy")
                                 .format(providerForm.expirationDateSelected!),
                         style: TextStyle(

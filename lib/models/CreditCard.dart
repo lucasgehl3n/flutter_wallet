@@ -24,10 +24,11 @@ class CreditCard {
     id = json['id'] ?? "";
     description = json['description'];
 
-    if (json['expirationDate'] != null && json['expirationDate'] != "")
-      // expirationDate = DateTime.parse(json['expirationDate']);
+    if (json['expirationDate'] != null && json['expirationDate'] != "") {
+      expirationDate = DateTime.parse(json['expirationDate']);
+    }
 
-      securityCode = json['securityCode'] ?? "";
+    securityCode = json['securityCode'] ?? "";
     number = json['number'] ?? "";
   }
 

@@ -15,7 +15,6 @@ class _BiometricReaderState extends State<BiometricReader> {
   Future _authenticate() async {
     authenticated = await auth.authenticate(
       localizedReason: ' ',
-      // useErrorDialogs: true,
       stickyAuth: true,
     );
 
@@ -25,12 +24,6 @@ class _BiometricReaderState extends State<BiometricReader> {
     if (!mounted) return;
   }
 
-  void _cancelAuthentication() async {
-    await auth.stopAuthentication();
-    setState(() => _isAuthenticating = false);
-  }
-
-//flutterant - Biometric Authentication
   @override
   Widget build(BuildContext context) {
     _authenticate();

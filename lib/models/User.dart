@@ -1,21 +1,18 @@
-import 'package:uuid/uuid.dart';
+import 'dart:io';
 
 class User {
   String id = "";
   String name = "";
-  String profilePhoto = "";
 
-  User(this.id, this.name, this.profilePhoto);
+  ///URL
+  String urlProfilePhoto = "";
+  File? profilePhoto;
+
+  User(this.id, this.name, this.urlProfilePhoto);
   User.newUser();
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? "";
     name = json['name'];
-    profilePhoto = json['profilePhoto'];
+    urlProfilePhoto = json['profilePhoto'];
   }
-
-  Map<String, dynamic> toJson() => {
-        'id': id != "" ? id : Uuid().v1(),
-        'name': name,
-        'profilePhoto': profilePhoto
-      };
 }

@@ -59,7 +59,7 @@ class _FieldsFormRegisterState extends State<FieldsFormRegister> {
     _numberController.text = widget.creditCard.number;
     _securityCodeController.text = widget.creditCard.securityCode;
     this.dtaVencimentoExistente = widget.creditCard.expirationDate;
-    Provider.of<ProviderFormRegisterCreditCard>(context)
+    Provider.of<ProviderFormRegisterCreditCard>(context, listen: false)
         .expirationDateSelected = dtaVencimentoExistente;
     return Consumer<ProviderFormRegisterCreditCard>(
       builder: (context, providerForm, child) => Column(children: [
@@ -134,7 +134,7 @@ class _FieldsFormRegisterState extends State<FieldsFormRegister> {
   ElevatedButton _deleteButton() {
     return ElevatedButton.icon(
       onPressed: () {
-        _tieAlert(context);
+        _confirmDelete(context);
       },
       label: Text('Excluir'),
       icon: Icon(Icons.delete),
@@ -148,7 +148,7 @@ class _FieldsFormRegisterState extends State<FieldsFormRegister> {
     );
   }
 
-  Future<String?> _tieAlert(context) {
+  Future<String?> _confirmDelete(context) {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(

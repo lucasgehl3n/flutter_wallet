@@ -48,9 +48,6 @@ class InputEditor extends StatelessWidget {
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white, width: 2.0),
           ),
-          // enabledBorder: OutlineInputBorder(
-          //   borderSide: BorderSide(color: Colors.white, width: 2.0),
-          // ),
         ),
         inputFormatters: _verificarMascara(), //Tipo de teclado
         keyboardType: tipo ?? TextInputType.text,

@@ -23,7 +23,7 @@ class _HomeCarteiraState extends State<HomeCarteira> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<User>(
-      future: _webClient.findUser(1),
+      future: _webClient.findUser(GeneralInfos.getUserLoginId()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           user = snapshot.data;
@@ -60,7 +60,7 @@ class _HomeCarteiraState extends State<HomeCarteira> {
           elevation: 4,
           backgroundColor: ColorsApplication.primaryColor,
           actions: [
-            ProfileUser(user ?? User.newUser()),
+            ProfileUser(),
           ],
         ),
         body: SingleChildScrollView(
@@ -68,7 +68,7 @@ class _HomeCarteiraState extends State<HomeCarteira> {
             color: ColorsApplication.primaryColor,
             constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height * 0.4,
-                maxHeight: MediaQuery.of(context).size.height),
+                maxHeight: MediaQuery.of(context).size.height * 0.9),
             child: Column(
               children: [
                 Row(
@@ -96,25 +96,26 @@ class _HomeCarteiraState extends State<HomeCarteira> {
 }
 
 class ProfileUser extends StatelessWidget {
-  final User user;
-  ProfileUser(this.user);
+  ProfileUser();
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Icon(
-          Icons.account_circle_sharp,
+    return Consumer<ProviderGeneralInfos>(
+      builder: (context, providerForm, child) => Stack(children: [
+        GestureDetector(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: _userImage(providerForm.userLogin ?? User.newUser()),
+          ),
+          onTap: () {
+            _openUserEdit(context, providerForm.userLogin ?? User.newUser());
+          },
         ),
-      ),
-      onTap: () {
-        _openUserEdit(context);
-      },
+      ]),
     );
   }
 
-  void _openUserEdit(context) {
+  void _openUserEdit(context, User user) {
     Navigator.of(context)
         .push(
       NavigationTransition.createRoute(
@@ -122,10 +123,37 @@ class ProfileUser extends StatelessWidget {
       ),
     )
         .then((user) {
+      print(user);
       if (user != null) {
         Provider.of<ProviderGeneralInfos>(context, listen: false)
             .updateUserLogin(user);
       }
     });
+  }
+
+  Widget _userImage(User user) {
+    return CircleAvatar(
+      radius: 12,
+      backgroundColor: ColorsApplication.greenColor,
+      child: user.urlProfilePhoto.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: Image.network(
+                user.urlProfilePhoto,
+                width: 20,
+                height: 20,
+                fit: BoxFit.fitHeight,
+              ),
+            )
+          : Container(
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(50)),
+              child: Icon(
+                Icons.account_circle_sharp,
+                color: ColorsApplication.primaryColor,
+                // size: 100,
+              ),
+            ),
+    );
   }
 }
