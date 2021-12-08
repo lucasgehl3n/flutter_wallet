@@ -4,11 +4,12 @@ import 'package:carteira_app/components/NavigationTransition.dart';
 import 'package:carteira_app/general/general.dart';
 import 'package:carteira_app/models/User.dart';
 import 'package:carteira_app/providers/ProviderGeneralInfos.dart';
-import 'package:carteira_app/screens/home/meusCartoes.dart';
 import 'package:carteira_app/screens/home/welcome.dart';
 import 'package:carteira_app/screens/registerUser/formRegisterUserScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'myCards.dart';
 
 class HomeCarteira extends StatefulWidget {
   HomeCarteira({Key? key}) : super(key: key);
